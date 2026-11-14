@@ -30,10 +30,10 @@ cd Knora-team/web-feature-test
 如果 `git clone` 连不上或没有 git，用压缩包（这个地址直连下载域名，网络不稳定时通常比 github.com 更可靠）：
 
 ```bash
-# macOS / Linux
-curl -L -o Knora-team.zip https://codeload.github.com/JavisGO/Knora-team/zip/refs/heads/main && unzip -q Knora-team.zip
+# macOS / Linux。解压请用 Python，不要用系统自带的 unzip：它处理不了压缩包里的中文文件名，会报误导性的 "write error (disk full?)"
+curl -L -o Knora-team.zip https://codeload.github.com/JavisGO/Knora-team/zip/refs/heads/main && python3 -m zipfile -e Knora-team.zip .
 cd Knora-team-main/web-feature-test
-# Windows PowerShell：Invoke-WebRequest https://codeload.github.com/JavisGO/Knora-team/zip/refs/heads/main -OutFile Knora-team.zip; Expand-Archive Knora-team.zip .; cd Knora-team-main\web-feature-test
+# Windows PowerShell：Invoke-WebRequest https://codeload.github.com/JavisGO/Knora-team/zip/refs/heads/main -OutFile Knora-team.zip; py -m zipfile -e Knora-team.zip .; cd Knora-team-main\web-feature-test
 ```
 
 两种都不行：告诉用户“这台机器访问不了 GitHub”，请用户手动下载并解压，把路径告诉你，然后从第 3 步继续。
@@ -96,6 +96,7 @@ WFT_HOME=<安装目录>
 |---|---|
 | `python3` 找不到 / 版本低于 3.9 | Windows 用 `py`；仍不行就告诉用户需要先安装 Python 3.9+ |
 | 创建虚拟环境失败 | Linux 先 `apt install python3-venv`；或加 `--no-venv` |
+| 解压时报 `write error (disk full?)` 或文件名变成问号 | 用了系统 unzip：改用 `python3 -m zipfile -e Knora-team.zip .`（磁盘其实没满） |
 | `pip install` 失败或很慢 | 让用户提供公司 pip 镜像并配置；不要换成来源不明的源 |
 | 预检提示“无法启动浏览器” | 没有 Chrome/Edge：`<WFT_PYTHON> -m playwright install chromium`，然后 `python3 install.py --channel chromium`，之后所有 `wft` 命令也加 `--channel chromium`（或设环境变量 `WFT_CHANNEL=chromium`） |
 | 自检失败，浏览器能启动但交互没通过 | 把自检输出原样告诉用户，不要自行改代码绕过；可先 `python3 install.py --no-selftest` 完成安装，再按 `QUICKSTART.md` 手动跑演示定位 |
