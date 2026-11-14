@@ -9,6 +9,16 @@
 
 ## 第 1 步：安装（约 2 分钟）
 
+**最省事：一条命令**（建虚拟环境、装依赖、预检，并启动演示站点用浏览器跑一个用例做自检）：
+
+```bash
+cd web-feature-test
+python3 install.py                          # Windows：py install.py
+. .venv/bin/activate                        # 激活虚拟环境；Windows：.venv\Scripts\activate
+```
+
+看到“安装完成”即可。也可以手动装：
+
 ```bash
 cd web-feature-test
 python3 -m venv .venv                       # Windows：py -m venv .venv
