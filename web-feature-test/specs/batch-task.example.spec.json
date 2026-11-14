@@ -1,0 +1,133 @@
+{
+  "name": "批量异步任务类功能：入口、配置校验、主链路冒烟（示例用例集）",
+  "_说明": "这是示例：把 vars 里的文字换成你们功能的实际文案即可复用。不含环境地址与账号。creates=true 的用例会在被测系统里新建一条带前缀的任务，必须加 --allow-create 才会执行。",
+  "vars": {
+    "ENTRY_URL": "${env:TEST_URL}",
+    "OBJECT_NAME": "${env:TEST_OBJECT}",
+    "TASK_PREFIX": "【自动化测试】",
+    "TRIGGER": "更多",
+    "ENTRY_ITEM": "评测管理",
+    "NEW_BTN": "新建评测任务",
+    "SUBMIT_BTN": "开始运行",
+    "QUERY_BTN": "查\\s*询"
+  },
+  "watch": [
+    {"name": "create", "url_re": "/tasks/create", "mutating": true, "success_body_contains": "\"statusCode\":200"}
+  ],
+  "macros": {
+    "open_feature": [
+      {"do": "goto", "url": "${ENTRY_URL}", "label": "打开入口页面"},
+      {"do": "hover", "card": {"contains": "${OBJECT_NAME}", "has": "${TRIGGER}"}, "timeout_ms": 45000, "label": "悬停对象卡片（页面加载慢时最多等 45 秒）"},
+      {"do": "click", "card": {"contains": "${OBJECT_NAME}", "has": "${TRIGGER}"}, "text": "${TRIGGER}", "label": "点击卡片“更多”"},
+      {"do": "click", "text": "${ENTRY_ITEM}", "last": true, "label": "点击菜单项“${ENTRY_ITEM}”"},
+      {"do": "wait_text", "text": "${NEW_BTN}", "label": "等待功能面板出现"}
+    ],
+    "open_new_form": [
+      {"do": "macro", "name": "open_feature"},
+      {"do": "click", "role": "button", "name": "${NEW_BTN}", "name_re": true, "label": "点击“${NEW_BTN}”"},
+      {"do": "wait", "ms": 800}
+    ]
+  },
+  "cases": [
+    {
+      "id": "TC-01", "title": "功能入口：卡片“更多”菜单含入口项，且能打开功能面板", "priority": "P0", "smoke": true,
+      "requirement": "入口与任务归属", "before": null,
+      "expect": "菜单里有入口项，点击后出现“新建”按钮",
+      "steps": [
+        {"do": "goto", "url": "${ENTRY_URL}"},
+        {"do": "hover", "card": {"contains": "${OBJECT_NAME}", "has": "${TRIGGER}"}},
+        {"do": "click", "card": {"contains": "${OBJECT_NAME}", "has": "${TRIGGER}"}, "text": "${TRIGGER}", "label": "展开“更多”"},
+        {"do": "expect_text", "text": "${ENTRY_ITEM}", "exact": true, "label": "菜单项存在"},
+        {"do": "click", "text": "${ENTRY_ITEM}", "last": true},
+        {"do": "expect_text", "text": "${NEW_BTN}", "exact": true, "label": "面板里有新建按钮"}
+      ]
+    },
+    {
+      "id": "TC-02", "title": "任务列表字段与需求一致", "priority": "P1", "requirement": "任务列表",
+      "before": "open_feature",
+      "expect": "表头包含需求列出的全部字段",
+      "steps": [
+        {"do": "expect_text", "text": "任务名称", "exact": true},
+        {"do": "expect_text", "text": "状态", "exact": true},
+        {"do": "expect_text", "text": "用例数", "exact": true},
+        {"do": "expect_text", "text": "执行轮次", "exact": true},
+        {"do": "expect_text", "text": "执行进度", "exact": true},
+        {"do": "expect_text", "text": "成功 / 失败", "exact": true},
+        {"do": "expect_text", "text": "输入 Token", "exact": true},
+        {"do": "expect_text", "text": "输出 Token", "exact": true},
+        {"do": "expect_text", "text": "发起人", "exact": true},
+        {"do": "expect_text", "text": "发起时间", "exact": true},
+        {"do": "expect_text", "text": "版本", "exact": true, "label": "需求要求的“版本”列（对象无版本概念时记为需求未明确）"}
+      ]
+    },
+    {
+      "id": "TC-03", "title": "任务名称必填", "priority": "P1", "requirement": "任务配置",
+      "before": "open_new_form",
+      "expect": "清空名称后提交，提示“请输入任务名称”，且不发起创建请求",
+      "steps": [
+        {"do": "fill", "after_text": "任务名称", "value": "", "label": "清空任务名称"},
+        {"do": "upload", "file": "good_1.zip"},
+        {"do": "click", "role": "button", "name": "${SUBMIT_BTN}", "name_re": true},
+        {"do": "expect_text", "text": "请输入任务名称"}
+      ]
+    },
+    {
+      "id": "TC-04", "title": "非 ZIP 文件在选择时被拦截", "priority": "P1", "requirement": "模板与上传规则",
+      "before": "open_new_form",
+      "expect": "提示仅支持 .zip，不进入校验",
+      "steps": [
+        {"do": "upload", "file": "A_not_zip.txt"},
+        {"do": "expect_text", "text": "仅支持 .zip"}
+      ]
+    },
+    {
+      "id": "TC-V", "title": "上传校验：${title}", "priority": "P1", "requirement": "上传校验",
+      "before": "open_new_form",
+      "expect": "提交时给出明确原因（含行列位置），并阻止创建",
+      "for_each": [
+        {"id": "TC-V1", "title": "缺少必填列", "pack": "A_missing_col.zip", "msg": "缺少|必需"},
+        {"id": "TC-V2", "title": "表头重复列", "pack": "A_dup_col.zip", "msg": "重复"},
+        {"id": "TC-V3", "title": "仅表头无用例", "pack": "A_no_cases.zip", "msg": "没有有效用例|无有效用例"},
+        {"id": "TC-V4", "title": "必填值缺失（应定位到行号；系统按 Excel 实际行号计，数据第2条=第3行）", "pack": "A_missing_value.zip", "msg": "第\\s*3\\s*行"},
+        {"id": "TC-V5", "title": "附件文件不存在（应定位到行与列）", "pack": "A_attach_missing.zip", "msg": "第\\s*3\\s*行|不存在"},
+        {"id": "TC-V6", "title": "附件重名（含不同目录）", "pack": "A_dup_name.zip", "msg": "重名|重复"}
+      ],
+      "steps": [
+        {"do": "upload", "file": "${pack}"},
+        {"do": "click", "role": "button", "name": "${SUBMIT_BTN}", "name_re": true},
+        {"do": "expect_text", "text": "${msg}", "regex": true, "label": "校验提示出现"},
+        {"do": "expect_count", "selector": ".ant-message-notice:has-text('成功')", "equals": 0, "label": "没有“创建成功”的提示"}
+      ]
+    },
+    {
+      "id": "TC-R", "title": "执行轮次边界：输入 ${val} 应被拦截或明确提示（不得静默替换）", "priority": "P1", "requirement": "任务配置-执行轮次",
+      "before": "open_new_form",
+      "expect": "非法值给出提示；若被悄悄改成别的值，判失败",
+      "for_each": [
+        {"id": "TC-R1", "val": "0"}, {"id": "TC-R2", "val": "-1"}, {"id": "TC-R3", "val": "11"}, {"id": "TC-R4", "val": "1.5"}
+      ],
+      "steps": [
+        {"do": "fill", "role": "spinbutton", "value": "${val}"},
+        {"do": "press", "key": "Tab"},
+        {"do": "read", "role": "spinbutton", "attr": "value", "as": "after", "label": "失焦后输入框的值"},
+        {"do": "note", "text": "输入 ${val}，失焦后变为 ${after}"},
+        {"do": "expect_text", "text": "范围|1\\s*[~～-]\\s*10|不能|必须|不合法|有效", "regex": true, "label": "出现范围/非法值提示"}
+      ]
+    },
+    {
+      "id": "TC-C1", "title": "主链路冒烟：1 用例×1 轮创建并跑完", "priority": "P0", "smoke": true, "creates": true,
+      "requirement": "执行与统计", "before": "open_new_form",
+      "expect": "创建接口返回成功；列表出现该任务并最终变为“已完成”",
+      "steps": [
+        {"do": "fill", "after_text": "任务名称", "value": "${TASK_PREFIX}冒烟-${env:WFT_RUN_ID}", "label": "填写带前缀的任务名称"},
+        {"do": "upload", "file": "good_1.zip"},
+        {"do": "click", "role": "button", "name": "${SUBMIT_BTN}", "name_re": true},
+        {"do": "expect_response", "watch": "create", "status": 200, "body_contains": "\"statusCode\":200", "label": "创建接口返回成功"},
+        {"do": "wait", "ms": 15000},
+        {"do": "click", "role": "button", "name": "${QUERY_BTN}", "name_re": true, "label": "刷新列表"},
+        {"do": "wait_text", "text": "已完成", "within": {"selector": "tr.ant-table-row", "has_text": "${TASK_PREFIX}冒烟-${env:WFT_RUN_ID}"}, "timeout_ms": 150000, "label": "等待任务变为已完成"},
+        {"do": "expect_text", "text": "已完成", "within": {"selector": "tr.ant-table-row", "has_text": "${TASK_PREFIX}冒烟-${env:WFT_RUN_ID}"}, "label": "列表行显示已完成"}
+      ]
+    }
+  ]
+}

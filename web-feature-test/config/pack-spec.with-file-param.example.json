@@ -1,0 +1,16 @@
+{
+  "sheet": "用例",
+  "excel_name": "cases.xlsx",
+  "attach_dir": "attachments",
+  "headers": ["文本参数", "文件参数"],
+  "required": ["文本参数"],
+  "attach_columns": ["文件参数"],
+  "multi_file_columns": [],
+  "allowed_ext": {"文件参数": ["xls", "xlsx"]},
+  "good_rows": [
+    ["请读取附件并总结关键内容", "sample.xlsx"],
+    ["请统计附件中的数据行数", "sample.xlsx"]
+  ],
+  "attachments": {"sample.xlsx": ""},
+  "long_text_len": 20000
+}

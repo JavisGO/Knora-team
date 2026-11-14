@@ -1,0 +1,60 @@
+<!doctype html><html lang="zh"><meta charset="utf-8"><title>wft 演示站点</title>
+<style>
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;margin:24px;color:#1f2329}
+.card{border:1px solid #d0d3d9;border-radius:8px;padding:16px;width:260px;position:relative}
+.ops{display:none;margin-top:10px}.card:hover .ops{display:block}
+button{padding:4px 12px;margin-right:6px;cursor:pointer}
+.menu{border:1px solid #d0d3d9;display:inline-block;padding:6px;margin-top:6px;background:#fff}
+.mask{position:fixed;inset:0;background:#fff;padding:24px;overflow:auto}
+table{border-collapse:collapse;width:100%;margin-top:12px}th,td{border:1px solid #d0d3d9;padding:6px 10px;text-align:left}
+.err{background:#fff1f0;color:#cf1322;padding:8px 12px;margin:10px 0;border-radius:4px}
+.row{margin:10px 0}label{display:inline-block;width:110px}
+</style>
+<h2>演示站点（仅用于体验 wft）</h2>
+<div class="card" role="group" aria-label="演示对象卡片">
+  <b>演示对象</b><div style="color:#86909c;font-size:12px">鼠标悬停显示操作</div>
+  <div class="ops"><button>编辑</button><button id="more">更多</button></div>
+  <div id="menu" class="menu" hidden><button id="entry">评测管理</button></div>
+</div>
+
+<div id="panel" class="mask" hidden role="dialog" aria-label="评测管理">
+  <h3>评测管理 · 演示对象</h3>
+  <button id="new">新建评测任务</button> <button id="refresh">查 询</button>
+  <table><thead><tr><th>任务名称</th><th>状态</th><th>用例数</th><th>执行轮次</th><th>发起时间</th></tr></thead><tbody id="rows"></tbody></table>
+
+  <div id="form" class="mask" hidden role="dialog" aria-label="评测配置">
+    <h3>评测配置</h3>
+    <div class="row"><label for="nm">任务名称</label><input id="nm" size="40"></div>
+    <div class="row"><label for="runs">每条用例运行</label><input id="runs" type="number" value="1"> 次</div>
+    <div class="row"><label>测试数据</label><button id="pick" type="button">点击选择文件</button> <span id="fname"></span>
+      <input id="file" type="file" hidden> <div style="color:#86909c;font-size:12px">仅支持 .zip 压缩包，文件不超过 50 MB</div></div>
+    <div id="err" class="err" hidden></div>
+    <div class="row"><button id="go">开始运行</button> <button id="close" type="button">返回</button></div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+$('more').onclick=()=>$('menu').hidden=false;
+$('entry').onclick=()=>{$('panel').hidden=false;load()};
+$('refresh').onclick=load;
+$('new').onclick=()=>{$('nm').value='演示对象_评测_'+Date.now();$('form').hidden=false;$('err').hidden=true};
+$('close').onclick=()=>{$('form').hidden=true;load()};
+$('pick').onclick=()=>$('file').click();
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;
+  if(!f.name.toLowerCase().endsWith('.zip')){$('fname').textContent='';$('file').value='';show(['仅支持 .zip 文件']);return}
+  $('fname').textContent='已选择：'+f.name;$('err').hidden=true};
+// 故意埋的缺陷：轮次非法值失焦后被静默改成合法值，没有任何提示（真实系统里很常见，需求通常要求给出提示）
+$('runs').onblur=()=>{let v=Math.round(Number($('runs').value)||1);$('runs').value=Math.min(10,Math.max(1,v))};
+function show(list,head){$('err').hidden=false;$('err').innerHTML=(head?'<b>'+head+'</b><br>':'')+list.map(x=>'<div>'+x+'</div>').join('')}
+$('go').onclick=async()=>{
+  if(!$('nm').value.trim()){show(['请输入任务名称']);return}
+  const f=$('file').files[0]; if(!f){show(['请先选择测试数据']);return}
+  const fd=new FormData();fd.append('file',f);fd.append('name',$('nm').value);fd.append('runs',$('runs').value);
+  const r=await fetch('/api/create',{method:'POST',body:fd});   // 和真实系统一样用表单（multipart）上传
+  const j=await r.json();
+  if(j.statusCode!==200){show(j.errors||[j.message],'创建失败，请按以下提示修改用例后重新上传：');return}
+  $('form').hidden=true;load()};
+async function load(){const j=await (await fetch('/api/tasks')).json();
+  $('rows').innerHTML=j.data.map(t=>`<tr class="task-row"><td>${t.name}</td><td>${t.status}</td><td>${t.cases}</td><td>${t.runs}</td><td>${new Date(t.at*1000).toLocaleString()}</td></tr>`).join('')}
+</script></html>

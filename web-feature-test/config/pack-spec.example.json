@@ -1,0 +1,17 @@
+{
+  "sheet": "用例",
+  "excel_name": "cases.xlsx",
+  "attach_dir": "attachments",
+  "headers": ["输入内容", "附件"],
+  "required": ["输入内容"],
+  "attach_columns": ["附件"],
+  "multi_file_columns": ["附件"],
+  "allowed_ext": {},
+  "good_rows": [
+    ["示例用例一：请回答问题A", ""],
+    ["示例用例二：请回答问题B", ""],
+    ["示例用例三：请回答问题C", ""]
+  ],
+  "attachments": {},
+  "long_text_len": 20000
+}

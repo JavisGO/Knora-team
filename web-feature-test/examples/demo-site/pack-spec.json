@@ -1,0 +1,1 @@
+{"sheet":"用例","excel_name":"cases.xlsx","attach_dir":"attachments","headers":["用户输入","附件"],"required":["用户输入"],"attach_columns":["附件"],"multi_file_columns":["附件"],"allowed_ext":{},"good_rows":[["请用一句话介绍你自己",""]],"attachments":{}}
