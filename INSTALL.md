@@ -27,13 +27,13 @@ git clone https://github.com/JavisGO/Knora-team.git
 cd Knora-team/web-feature-test
 ```
 
-如果 `git clone` 连不上或没有 git，用压缩包：
+如果 `git clone` 连不上或没有 git，用压缩包（这个地址直连下载域名，网络不稳定时通常比 github.com 更可靠）：
 
 ```bash
 # macOS / Linux
-curl -L -o Knora-team.zip https://github.com/JavisGO/Knora-team/archive/refs/heads/main.zip && unzip -q Knora-team.zip
+curl -L -o Knora-team.zip https://codeload.github.com/JavisGO/Knora-team/zip/refs/heads/main && unzip -q Knora-team.zip
 cd Knora-team-main/web-feature-test
-# Windows PowerShell：Invoke-WebRequest https://github.com/JavisGO/Knora-team/archive/refs/heads/main.zip -OutFile Knora-team.zip; Expand-Archive Knora-team.zip .; cd Knora-team-main\web-feature-test
+# Windows PowerShell：Invoke-WebRequest https://codeload.github.com/JavisGO/Knora-team/zip/refs/heads/main -OutFile Knora-team.zip; Expand-Archive Knora-team.zip .; cd Knora-team-main\web-feature-test
 ```
 
 两种都不行：告诉用户“这台机器访问不了 GitHub”，请用户手动下载并解压，把路径告诉你，然后从第 3 步继续。
