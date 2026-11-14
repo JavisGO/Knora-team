@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+# wft 运行产物与登录态（登录态等同凭据，绝不能提交）
+out*/
+out-demo/
+.mcp-out/
+state*.json
+.web-feature-test/
+.DS_Store
