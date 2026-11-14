@@ -6,6 +6,7 @@
 测试一个网页功能并交付带截图的测试报告。工具是本目录的 `wft`（Playwright + Python 命令行），用例是 JSON 文件。你负责：拆需求、写用例、执行、看结果、判定、写缺陷与结论。程序负责：执行、截图、抓接口、冒烟门禁、数据创建护栏、报告核对。
 
 ## 先做
+0. 还没安装？看仓库根目录的 `INSTALL.md`，或在本目录执行 `python3 install.py`，记下它打印的 `WFT_PYTHON`，之后所有命令用 `<WFT_PYTHON> -m wft ...`。
 1. 读 `SKILL.md`，再读 `references/04-用例DSL与wft命令参考.md` 和 `references/02-测试规范.md`。
 2. 向使用者确认：被测对象、地址、账号、需求原文、范围边界。**口令不要让使用者写进聊天或文件**，让他在终端里 `export TEST_PASSWORD=…` 并自己运行 `python -m wft login`，你只使用登录态文件。
 3. 环境：`python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt && python -m wft doctor`。

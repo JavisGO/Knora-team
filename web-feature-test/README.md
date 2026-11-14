@@ -12,6 +12,8 @@
 
 需要：Python 3.9+，以及本机已安装的 Chrome（或 Edge）。
 
+**一条命令搞定**（建虚拟环境、装依赖、预检、浏览器自检）：`cd web-feature-test && python3 install.py`（Windows：`py install.py`）。想装进某个 AI agent 的 skills 目录，加 `--skills-dir <目录>`。下面是手动方式：
+
 ```bash
 cd web-feature-test
 python3 -m venv .venv
